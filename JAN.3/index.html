@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fibonaccid - Espiral</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: #111;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      var phi = 1.618033988749; // Proporción áurea
+      var goldenAngle; // Se inicializa en setup
+      var trails = []; // Todos los recorridos
+      var smileys = []; // Smileys activos
+      var maxT = 18;
+      var speed = 0.05;
+      var maxSmileys = 8;
+
+      function setup() {
+        createCanvas(800, 800);
+        frameRate(60);
+        goldenAngle = PI * (3 - sqrt(5)); // Ángulo áureo ≈ 137.5°
+        // Crear primer smiley
+        addSmiley();
+      }
+
+      function addSmiley() {
+        var angle = smileys.length * goldenAngle; // Cada uno separado por ángulo áureo
+        smileys.push({
+          t: 0,
+          direction: 1,
+          baseAngle: angle,
+          trail: [],
+        });
+      }
+
+      // Ease In-Out
+      function easeInOut(x) {
+        return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+      }
+
+      function draw() {
+        background(20, 20, 25);
+        translate(width / 2, height / 2);
+
+        var a = 2;
+        var b = Math.log(phi) / (PI / 2);
+
+        // Dibujar todos los recorridos completados
+        for (var j = 0; j < trails.length; j++) {
+          var trail = trails[j];
+          noFill();
+          strokeWeight(2.5);
+          stroke(255, 180, 50, 150);
+          beginShape();
+          for (var i = 0; i < trail.length; i++) {
+            vertex(trail[i].x, trail[i].y);
+          }
+          endShape();
+        }
+
+        // Actualizar y dibujar cada smiley
+        for (var s = 0; s < smileys.length; s++) {
+          var sm = smileys[s];
+
+          // Calcular posición en el espiral
+          var r = a * Math.exp(b * sm.t);
+          var theta = sm.t + sm.baseAngle;
+          var x = r * cos(theta);
+          var y = r * sin(theta);
+
+          // Velocidad con Slow In/Out
+          var progress = sm.t / maxT;
+          var currentSpeed =
+            speed * (0.3 + 0.7 * (1 - Math.abs(progress - 0.5) * 2));
+          currentSpeed = max(currentSpeed, speed * 0.4);
+
+          // Guardar en el trail
+          sm.trail.push({ x: x, y: y });
+
+          // Dibujar trail actual
+          noFill();
+          strokeWeight(3);
+          stroke(255, 220, 50, 200);
+          beginShape();
+          for (var i = 0; i < sm.trail.length; i++) {
+            vertex(sm.trail[i].x, sm.trail[i].y);
+          }
+          endShape();
+
+          // Dibujar smiley
+          drawSmiley(x, y, 30);
+
+          // Mover
+          sm.t += currentSpeed * sm.direction;
+
+          // Cambiar dirección al llegar al borde
+          if (r > 350 && sm.direction === 1) {
+            sm.direction = -1;
+          }
+          // Al volver al centro: guardar trail
+          else if (sm.t <= 0.5 && sm.direction === -1) {
+            trails.push(sm.trail.slice());
+            sm.trail = [];
+            sm.t = 0;
+            sm.direction = 1;
+          }
+        }
+
+        // Agregar nuevo smiley cada cierto tiempo (hasta el máximo)
+        if (frameCount % 120 === 0 && smileys.length < maxSmileys) {
+          addSmiley();
+        }
+
+        // Info
+        fill(100);
+        noStroke();
+        textSize(14);
+        text(
+          "Fibonaccid: " +
+            smileys.length +
+            "/" +
+            maxSmileys +
+            " | R = reiniciar",
+          -380,
+          -380
+        );
+      }
+
+      function drawSmiley(x, y, size) {
+        push();
+        translate(x, y);
+
+        noStroke();
+        fill(255, 220, 50);
+        ellipse(0, 0, size, size);
+
+        fill(0);
+        ellipse(-size * 0.18, -size * 0.12, size * 0.1, size * 0.15);
+        ellipse(size * 0.18, -size * 0.12, size * 0.1, size * 0.15);
+
+        noFill();
+        stroke(0);
+        strokeWeight(size * 0.05);
+        arc(0, size * 0.08, size * 0.4, size * 0.25, 0.3, PI - 0.3);
+
+        pop();
+      }
+
+      function keyPressed() {
+        if (key == "r" || key == "R") {
+          trails = [];
+          smileys = [];
+          addSmiley();
+        }
+      }
+    </script>
+  </body>
+</html>

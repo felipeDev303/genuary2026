@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Day n Night - Physicists of Light</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: "Courier New", monospace;
+        background: #000;
+      }
+
+      #controls {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 0, 0, 0.9);
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        z-index: 1000;
+        font-size: 11px;
+      }
+
+      .button {
+        display: inline-block;
+        margin: 5px;
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: white;
+        cursor: pointer;
+        font-size: 10px;
+        font-family: "Courier New", monospace;
+        transition: all 0.2s;
+        letter-spacing: 1px;
+      }
+
+      .button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+
+      .button.active {
+        background: rgba(255, 51, 102, 0.3);
+        border-color: #ff3366;
+      }
+
+      h2 {
+        margin: 0 0 15px 0;
+        font-size: 12px;
+        letter-spacing: 3px;
+        font-weight: normal;
+        opacity: 0.7;
+      }
+
+      #info {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 9px;
+        letter-spacing: 1px;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="controls">
+      <h2>BINARY ECLIPSE</h2>
+      <div>
+        <button class="button" id="btnOn" onclick="lightsOn()">LIGHT ON</button>
+        <button class="button" id="btnOff" onclick="lightsOff()">
+          LIGHT OFF
+        </button>
+      </div>
+    </div>
+
+    <div id="info">GENUARY 2026 | Lights on/off</div>
+
+    <script>
+      // State
+      let isLightOn = true;
+      let targetLight = 1;
+      let currentLight = 1;
+      let transitionSpeed = 0.025;
+
+      let eclipseActive = false;
+      let eclipseProgress = 0;
+
+      // Physicists and their contributions
+      const physicists = [
+        {
+          name: "Newton",
+          year: "1672",
+          discovery: "Corpuscular theory",
+          equation: "F=ma",
+        },
+        {
+          name: "Huygens",
+          year: "1690",
+          discovery: "Wave theory",
+          equation: "λ=v/f",
+        },
+        {
+          name: "Young",
+          year: "1801",
+          discovery: "Interference",
+          equation: "Δ=mλ",
+        },
+        {
+          name: "Fresnel",
+          year: "1818",
+          discovery: "Diffraction",
+          equation: "I∝A²",
+        },
+        {
+          name: "Maxwell",
+          year: "1865",
+          discovery: "EM waves",
+          equation: "c=1/√(ε₀μ₀)",
+        },
+        {
+          name: "Einstein",
+          year: "1905",
+          discovery: "Photoelectric",
+          equation: "E=hν",
+        },
+        {
+          name: "Bohr",
+          year: "1913",
+          discovery: "Quantum orbits",
+          equation: "E=-13.6/n²",
+        },
+        {
+          name: "de Broglie",
+          year: "1924",
+          discovery: "Wave-particle",
+          equation: "λ=h/p",
+        },
+      ];
+
+      // Orbits
+      let orbits = [];
+
+      // Perlin noise for corona
+      let noiseOffset = 0;
+      let coronaNoiseSeeds = [];
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        textFont("Courier New");
+
+        // Initialize corona noise seeds
+        for (let i = 0; i < 5; i++) {
+          coronaNoiseSeeds.push(random(1000));
+        }
+
+        initOrbits();
+      }
+
+      function draw() {
+        // Update transitions
+        currentLight = lerp(currentLight, targetLight, transitionSpeed);
+
+        if (eclipseActive) {
+          eclipseProgress = min(1, eclipseProgress + 0.008);
+        } else {
+          eclipseProgress = max(0, eclipseProgress - 0.015);
+        }
+
+        // Background
+        const bgColor = map(currentLight, 0, 1, 3, 12);
+        background(bgColor);
+
+        // Center translation
+        translate(width / 2, height / 2);
+
+        // Draw layers
+        drawOrbits();
+        drawCenter();
+
+        // Update noise
+        noiseOffset += 0.003;
+      }
+
+      function initOrbits() {
+        orbits = [];
+        const baseRadius = min(width, height) * 0.08;
+
+        for (let i = 0; i < physicists.length; i++) {
+          const radius = baseRadius * (i + 1.5);
+
+          // Alternate colors: red for particle theorists, white for wave theorists
+          const isParticle = i % 2 === 0;
+          const col = isParticle
+            ? color(255, 51, 102, 180) // Red
+            : color(255, 255, 255, 180); // White
+
+          // Random rotation speed and direction
+          const rotationSpeed = random(0.3, 0.7) * (random() > 0.5 ? 1 : -1);
+
+          // Small offset for orbital eccentricity
+          const offset = createVector(random(-5, 5), random(-5, 5));
+
+          // Create points around orbit
+          const points = [];
+          for (let angle = 0; angle < 360; angle += random(30, 60)) {
+            points.push(angle);
+          }
+
+          // Extra points (like moons or satellites)
+          const extraPoints = [random(0, 360), random(0, 360)];
+
+          orbits.push({
+            physicist: physicists[i],
+            radius: radius,
+            color: col,
+            rotationSpeed: rotationSpeed,
+            points: points,
+            extraPoints: extraPoints,
+            offset: offset,
+            isParticle: isParticle,
+          });
+        }
+      }
+
+      function drawOrbits() {
+        orbits.forEach((orbit, index) => {
+          // Orbit opacity based on light state
+          const baseAlpha = map(currentLight, 0, 1, 60, 180);
+
+          // Eclipse effect on colors
+          let orbitColor = orbit.color;
+          if (eclipseProgress > 0.5) {
+            // During eclipse, all orbits get golden tint
+            orbitColor = lerpColor(
+              orbit.color,
+              color(255, 215, 0, baseAlpha),
+              eclipseProgress * 0.5
+            );
+          } else {
+            orbitColor = color(
+              red(orbit.color),
+              green(orbit.color),
+              blue(orbit.color),
+              baseAlpha
+            );
+          }
+
+          // Draw orbit circle
+          stroke(orbitColor);
+          strokeWeight(0.8);
+          noFill();
+          ellipse(orbit.offset.x, orbit.offset.y, orbit.radius * 2);
+
+          // Draw orbit points (particles/photons)
+          strokeWeight(4);
+          orbit.points.forEach((angle) => {
+            const x = orbit.radius * cos(radians(angle)) + orbit.offset.x;
+            const y = orbit.radius * sin(radians(angle)) + orbit.offset.y;
+
+            stroke(orbitColor);
+            point(x, y);
+
+            // Glow when lights are on
+            if (currentLight > 0.5) {
+              strokeWeight(8);
+              stroke(red(orbitColor), green(orbitColor), blue(orbitColor), 60);
+              point(x, y);
+              strokeWeight(4);
+            }
+          });
+
+          // Draw extra points (satellites)
+          strokeWeight(3);
+          orbit.extraPoints.forEach((angle) => {
+            const x = orbit.radius * cos(radians(angle)) + orbit.offset.x;
+            const y = orbit.radius * sin(radians(angle)) + orbit.offset.y;
+
+            stroke(255, 255, 255, baseAlpha * 0.8);
+            point(x, y);
+          });
+
+          // Draw physicist label at one point
+          const labelAngle = orbit.points[0];
+          const labelX =
+            orbit.radius * cos(radians(labelAngle)) + orbit.offset.x;
+          const labelY =
+            orbit.radius * sin(radians(labelAngle)) + orbit.offset.y;
+
+          push();
+          translate(labelX, labelY);
+
+          const textAlpha = map(currentLight, 0, 1, 120, 220);
+
+          // Name
+          fill(255, textAlpha);
+          noStroke();
+          textSize(8);
+          textAlign(CENTER, CENTER);
+          text(orbit.physicist.name, 0, -12);
+
+          // Year
+          fill(255, 153, 51, textAlpha * 0.8);
+          textSize(7);
+          text(orbit.physicist.year, 0, -3);
+
+          // Equation
+          textSize(7);
+          text(orbit.physicist.equation, 0, 6);
+
+          pop();
+
+          // Update angles (rotation)
+          const speedMult = map(currentLight, 0, 1, 0.3, 1);
+          orbit.points = orbit.points.map(
+            (angle) => (angle + orbit.rotationSpeed * speedMult) % 360
+          );
+          orbit.extraPoints = orbit.extraPoints.map(
+            (angle) => (angle + orbit.rotationSpeed * speedMult * 1.5) % 360
+          );
+        });
+      }
+
+      function drawCenter() {
+        const centerSize = 70;
+
+        // Outer glow
+        noStroke();
+        const glowAlpha = map(currentLight, 0, 1, 15, 50);
+        for (let i = 5; i > 0; i--) {
+          const size = centerSize + i * 15;
+          fill(255, glowAlpha / i);
+          ellipse(0, 0, size);
+        }
+
+        // Main body (Sun)
+        const bodyBrightness = map(currentLight, 0, 1, 80, 255);
+        fill(255, bodyBrightness);
+        ellipse(0, 0, centerSize);
+
+        // Corona during eclipse (only halo, no rays)
+        if (eclipseProgress > 0.6) {
+          drawCorona(centerSize);
+        }
+
+        // Eclipse overlay (Moon)
+        if (eclipseProgress > 0 || !isLightOn) {
+          const moonOffset = map(eclipseProgress, 0, 1, -centerSize * 1.5, 0);
+
+          // Moon shadow
+          fill(0, 30);
+          ellipse(moonOffset + 1, 1, centerSize * 0.95);
+
+          // Moon body - completely black during eclipse
+          fill(0);
+          ellipse(moonOffset, 0, centerSize * 0.9);
+        }
+
+        // Center highlight (only when lights are on)
+        if (isLightOn && eclipseProgress < 0.3) {
+          const highlightAlpha = map(currentLight, 0, 1, 20, 100);
+          fill(255, highlightAlpha);
+          ellipse(0, 0, centerSize * 0.25);
+        }
+      }
+
+      function drawCorona(centerSize) {
+        // Perlin noise-based organic corona (like PerlinBlob)
+        const coronaAlpha = map(eclipseProgress, 0.6, 1, 0, 200);
+
+        // Get the first orbit radius to limit corona size
+        const firstOrbitRadius = orbits[0] ? orbits[0].radius : centerSize * 3;
+        const maxCoronaRadius = min(firstOrbitRadius * 0.85, centerSize * 1.4);
+
+        // Draw 5 organic layers
+        const numLayers = 5;
+
+        for (let layer = 0; layer < numLayers; layer++) {
+          const baseRadius =
+            centerSize * 0.5 +
+            (maxCoronaRadius - centerSize * 0.5) * (layer / numLayers);
+          const t = layer / numLayers;
+
+          // Color gradient from inner orange to outer red
+          const r = lerp(255, 180, t);
+          const g = lerp(140, 30, t);
+          const b = 0;
+          const alpha = coronaAlpha * (1 - t * 0.6) * 0.5;
+
+          stroke(r, g, b, alpha);
+          strokeWeight(map(layer, 0, numLayers - 1, 1.5, 0.5));
+          noFill();
+
+          // Draw organic shape with Perlin noise
+          beginShape();
+          for (let angle = 0; angle <= 360; angle += 5) {
+            const xoff = map(cos(angle), -1, 1, 0, 1);
+            const yoff = map(sin(angle), -1, 1, 0, 1);
+
+            const noiseVal = noise(
+              (xoff + coronaNoiseSeeds[layer]) * 0.8 + noiseOffset,
+              (yoff + coronaNoiseSeeds[layer]) * 0.8 + noiseOffset
+            );
+
+            // Organic offset based on noise
+            const maxOffset = (maxCoronaRadius - baseRadius) * 0.8;
+            const offset = map(noiseVal, 0.3, 0.7, -maxOffset, maxOffset, true);
+            const radius = baseRadius + offset;
+
+            const x = radius * cos(radians(angle));
+            const y = radius * sin(radians(angle));
+
+            curveVertex(x, y);
+          }
+          endShape(CLOSE);
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+
+        // Reinitialize corona noise seeds
+        coronaNoiseSeeds = [];
+        for (let i = 0; i < 5; i++) {
+          coronaNoiseSeeds.push(random(1000));
+        }
+
+        initOrbits();
+      }
+
+      // Controls
+      function lightsOn() {
+        isLightOn = true;
+        targetLight = 1;
+        eclipseActive = false;
+        eclipseProgress = 0;
+      }
+
+      function lightsOff() {
+        isLightOn = false;
+        targetLight = 0;
+        eclipseActive = true;
+      }
+
+      function toggleLights() {
+        if (isLightOn) {
+          lightsOff();
+        } else {
+          lightsOn();
+        }
+      }
+
+      function toggleEclipse() {
+        eclipseActive = !eclipseActive;
+        if (eclipseActive) {
+          isLightOn = false;
+          targetLight = 0;
+        } else {
+          isLightOn = true;
+          targetLight = 1;
+        }
+      }
+
+      // Keyboard
+      function keyPressed() {
+        if (key === " ") {
+          toggleLights();
+        }
+      }
+
+      // Mouse
+      function mousePressed() {
+        toggleLights();
+      }
+    </script>
+  </body>
+</html>

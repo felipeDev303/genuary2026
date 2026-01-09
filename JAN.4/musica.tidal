@@ -1,0 +1,25 @@
+-- VELOCIDAD (170 BPM)
+setcps (170/60/4)
+
+d1 $ stack [
+  -- BATERÍA DRILL 'N' BASS
+  every 4 (fast 2) $ s "bd [sd ~ sd:2] ~ [cp,sd]" 
+    # shape 0.6 
+    # gain 1.2,
+
+  -- PERCUSIÓN GLITCH
+  s "hh*16" 
+    # striate 4            
+    # pan (fast 4 $ sine)  
+    # speed (range 1 1.5 perlin) 
+    # gain 0.9, 
+
+  -- BAJO REESE
+  slow 2 $ note "c1 [~ f1] g1 [~ . c2]" 
+    # s "superrees" 
+    # lpf 1500 
+    # resonance 0.2 
+    # shape 0.5
+]
+
+//hush
