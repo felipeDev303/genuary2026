@@ -1,0 +1,64 @@
+setcps (126/60/4)
+
+d1 $
+  s "[808bd:2 ~ ~ 808bd:2 ~ ~ 808bd:2 ~ ~ ~ 808bd:2 ~ ~ ~ ~ ~ 808bd:2 ~ ~ ~ ~ ~ 808bd:2 ~ ~ ~ 808bd:2 ~ ~ ~ ~ ~]/2"
+  # gain 1.2
+
+
+d2 $
+  s "~ ~ ~ ~ 808sd:6 ~ ~ ~ ~ ~ ~ ~ 808sd:6 ~ ~ ~"
+  # sustain 0.4
+  # pan 0.3
+  # gain 0.8
+  # delay 0.6
+  # delaytime (1/64)
+  # delayfeedback 0.6
+
+
+d3 $
+  s "~ ~ ~ ~ 808:3 ~ ~ ~ ~ ~ ~ ~ 808:3 ~ ~ ~"
+  # nudge 0.02
+  # pan 0.7
+  # speed 1.1
+  # gain 0.6
+  # delay 0.6
+  # delaytime (1/64)
+  # delayfeedback 0.6
+
+d4 $
+  s "[808:4 808:4 808:4 808:4 ~ ~ ~ ~]*2"
+  # gain 0.7
+
+
+d5 $
+  s "~ ~ ~ ~ 808oh:6 ~ ~ ~ ~ ~ ~ ~ 808oh:6 ~ ~ ~"
+  # gain 0.7
+
+d6 $
+  slow 2 $
+  note "c3'min7"
+  # s "juno:2"
+  # release 2
+  # room 0.4
+  # size 0.9
+  # gain 0.5
+
+
+d7 $
+  n "<[~ 0 ~ 0 ~ 0 0 ~ ~ ~ 0 0 0 0 ~ 0]>"
+  # s "bass1:2"
+  # octave 5
+  # lpf 650
+  # resonance 0.3
+  # sustain 0.06
+  # decay 0.15
+  # gain 0.8
+
+d8 $ sound "numbers:1 ~ numbers:2 ~ numbers:3 ~ numbers:4 ~ ~ ~ ~ ~ ~ ~ ~ ~" 
+  # speed "1.5 0 0.5 0 1.5 0 0.5 0 0 0 0 0"
+  # gain 0.7
+
+
+d1 silence
+
+hush
