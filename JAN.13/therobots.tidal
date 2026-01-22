@@ -1,0 +1,32 @@
+setcps 0.9
+
+d1 $ slow 2 $ n "[d3 d3 c3 c3 d3 d3 c3 c3 d3 d3 ~ ~ f3 f3 ~ ~ d3 d3 c3 c3 d3 d3 c3 c3 d3 d2 d2 d2 d2 ~ ~ ~]/2"
+  # s "supersaw"
+  # sustain 0.1
+  # release 0.1
+  # lpf 1000
+  # resonance 0.2
+  # gain 0.85
+
+d2 $ slow 2 $ 
+  stack [
+    s "808bd:1 ~ ~ ~ 808bd:1 808bd:1 ~ ~"
+    # release 0.3
+    # shape 0.3,        
+    s "~ ~ 808sd:1 ~ ~ ~ 808sd:1 ~"
+    # pan 0.5       
+    # release 0.3,
+    s "~ ~ hit:6 ~ ~ ~ hit:6 ~"
+    # release 0.3
+    # cutoff 8000
+    # gain 0.7
+  ]
+
+d3 $ slow 4 $ 
+  n "d4 ~ ~ d4 f4 d4 ~ ~ f5 ~ g5 c6 a5 ~ ~ ~"
+  # s "superchip"              
+  # sustain 0.1
+  # pan 0.3
+  # gain 0.7
+
+hush
