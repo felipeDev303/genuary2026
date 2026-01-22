@@ -1,9 +1,6 @@
-samples("https://github.com/tidalcycles/Dirt-Samples");
-
 setCps(168 / 60 / 4);
-
 let drone = stack(
-  "<Am7 Em7 Gm7 Bb7>"
+  "<Am7 Gm7 C7 Fmaj7 Bm7 E7>"
     .voicings("lefthand")
     .superimpose((x) => x.add(0.15))
     .add(perlin.range(0, 0.05))
@@ -19,7 +16,6 @@ let drone = stack(
 )
   .slow(6)
   .color("blue");
-
 let bassline = arrange(
   [6, "<e2 e1>".note().euclid(3, 8)],
   [6, "<g2 g1>".note().euclid(3, 8)],
@@ -27,15 +23,12 @@ let bassline = arrange(
   [6, "<c2 c1>".note().euclid(3, 8)],
 )
   .add(perlin.range(0, 0.15))
-  .gain(slider(0.9, 0, 1))
+  .gain(slider(0.693, 0, 1))
   .add(perlin.range(0, 0.55))
   .room(0.5)
   .punchcard();
-
 drone: drone;
-
 let tam = s("tambourine2*8").room(0.2).gain(perlin.range(0.2, 0.5));
-
 let bo_1 = "[E2 C2 ~!6]"
   .note()
   .s("bongo")
@@ -45,7 +38,6 @@ let bo_1 = "[E2 C2 ~!6]"
   .gain(1.5)
   .mask("<1 0!8>")
   .pianoroll();
-
 let bo_2 = "[F2 F#2 ~!6]"
   .note()
   .s("bongo")
@@ -55,25 +47,19 @@ let bo_2 = "[F2 F#2 ~!6]"
   .gain(1.5)
   .mask("<1 0!8>")
   .pianoroll();
-
 let b1 = "0 ~!3 [2 3] ~!3";
 let b2 = "0 1 <2 2*2> 3 <[3, 4] [0 4]> 5 6 7";
-
-let breakbeat = s("breaks-main:1")
+let breakbeat = s("breaks165")
   .slice(8, b2.every(4, rev()))
   .degradeBy(0)
   .add(perlin.range(0, 0.4))
   .superimpose((x) => x.add(0.15))
-  .hpf(slider(2500, 50, 3000))
+  //.lpf(mouseX.mul(1800).add(140))
+  //.lpq(mouseY.mul(20))
+  .hpf(slider(929.1, 50, 3000))
   .room(0.2)
-  .gain(slider(0.6, 0, 1))
+  .gain(slider(0.651, 0, 1))
   .speed(1);
-
-a: stack(
-  tam,
-  //bo_1,bo_2
-);
-
+//.cutoff(slider(613.45,50,3000))
+a: stack(tam, bo_1, bo_2);
 b: stack(bassline, breakbeat);
-
-s("bd*4").lpf(1000).room(0.5);
