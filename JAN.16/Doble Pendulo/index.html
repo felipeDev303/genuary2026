@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      // Constantes físicas
+      let g; // Gravedad
+      let m1 = 20; // Masa del primer péndulo
+      let m2 = 20; // Masa del segundo péndulo
+      let l1 = 120; // Longitud del primer péndulo
+      let l2 = 120; // Longitud del segundo péndulo
+
+      // Arreglo para almacenar los dos péndulos
+      let pendulums = [];
+
+      // Clase para un solo péndulo doble
+      class DoublePendulum {
+        constructor(x, y, a1_init, a2_init, pendulumColor) {
+          // Posición del pivote
+          this.x = x;
+          this.y = y;
+
+          // Ángulos iniciales
+          this.a1 = a1_init;
+          this.a2 = a2_init;
+
+          // Velocidades y aceleraciones angulares
+          this.a1_v = 0;
+          this.a2_v = 0;
+          this.a1_a = 0;
+          this.a2_a = 0;
+
+          // Historial de la posición de la segunda masa para el rastro
+          this.path = [];
+          this.color = pendulumColor;
+        }
+
+        update() {
+          // ---- ECUACIONES DEL PÉNDULO DOBLE ----
+          // Estas ecuaciones son el corazón no lineal y caótico
+          let num1 = -g * (2 * m1 + m2) * sin(this.a1);
+          let num2 = -m2 * g * sin(this.a1 - 2 * this.a2);
+          let num3 = -2 * sin(this.a1 - this.a2) * m2;
+          let num4 =
+            this.a2_v * this.a2_v * l2 +
+            this.a1_v * this.a1_v * l1 * cos(this.a1 - this.a2);
+          let den = l1 * (2 * m1 + m2 - m2 * cos(2 * this.a1 - 2 * this.a2));
+          this.a1_a = (num1 + num2 + num3 * num4) / den;
+
+          num1 = 2 * sin(this.a1 - this.a2);
+          num2 = this.a1_v * this.a1_v * l1 * (m1 + m2);
+          num3 = g * (m1 + m2) * cos(this.a1);
+          num4 = this.a2_v * this.a2_v * l2 * m2 * cos(this.a1 - this.a2);
+          den = l2 * (2 * m1 + m2 - m2 * cos(2 * this.a1 - 2 * this.a2));
+          this.a2_a = (num1 * (num2 + num3 + num4)) / den;
+          // ----------------------------------------
+
+          // Actualizar velocidades y ángulos
+          this.a1_v += this.a1_a;
+          this.a2_v += this.a2_a;
+          this.a1 += this.a1_v;
+          this.a2 += this.a2_v;
+
+          // Aplicar fricción para estabilizar un poco si es necesario (opcional)
+          this.a1_v *= 0.999;
+          this.a2_v *= 0.999;
+
+          // Calcular las posiciones de las masas
+          this.x1 = this.x + l1 * sin(this.a1);
+          this.y1 = this.y + l1 * cos(this.a1);
+          this.x2 = this.x1 + l2 * sin(this.a2);
+          this.y2 = this.y1 + l2 * cos(this.a2);
+
+          // Guardar la posición de la segunda masa para el rastro
+          this.path.push(createVector(this.x2, this.y2));
+          if (this.path.length > 500) {
+            // Limitar la longitud del rastro
+            this.path.shift();
+          }
+        }
+
+        display() {
+          stroke(this.color);
+          strokeWeight(2);
+
+          // Dibujar las varillas
+          line(this.x, this.y, this.x1, this.y1);
+          line(this.x1, this.y1, this.x2, this.y2);
+
+          // Dibujar las masas
+          fill(this.color);
+          ellipse(this.x1, this.y1, m1 / 2); // Divide por 2 para que sea visualmente el radio, no el diámetro de la masa
+          ellipse(this.x2, this.y2, m2 / 2);
+
+          // Dibujar el rastro
+          beginShape();
+          noFill();
+          for (let i = 0; i < this.path.length; i++) {
+            let p = this.path[i];
+            vertex(p.x, p.y);
+          }
+          endShape();
+        }
+      }
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        g = 1; // Ajusta la gravedad para la simulación
+
+        // Péndulo 1 (rojo)
+        // Ángulos iniciales ligeramente diferentes para ver el caos
+        let a1_init_1 = PI / 2; // 90 grados
+        let a2_init_1 = PI / 2;
+        pendulums.push(
+          new DoublePendulum(
+            width / 2,
+            100,
+            a1_init_1,
+            a2_init_1,
+            color(255, 0, 0, 200),
+          ),
+        ); // Color rojo con transparencia
+
+        // Péndulo 2 (azul) - con una diferencia mínima en el segundo ángulo
+        let a1_init_2 = PI / 2;
+        let a2_init_2 = PI / 2 + 0.001; // ¡Solo 0.001 radianes de diferencia!
+        pendulums.push(
+          new DoublePendulum(
+            width / 2,
+            100,
+            a1_init_2,
+            a2_init_2,
+            color(0, 0, 255, 200),
+          ),
+        ); // Color azul con transparencia
+      }
+
+      function draw() {
+        background(255, 5); // Fondo semitransparente para dejar un rastro blanco
+
+        for (let p of pendulums) {
+          p.update();
+          p.display();
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }
+    </script>
+  </body>
+</html>
