@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      /**
+       * Péndulo Doble - Vista NADIR (desde abajo mirando hacia arriba)
+       * DOS péndulos con colores diferentes
+       * Magenta #d024d2 y Verde #64de31
+       * 
+       * La diferencia con cenital es que invertimos la proyección Z
+       * creando un efecto de espejo/reflejo
+       */
+
+      let g = 1;
+      let m1 = 20;
+      let m2 = 20;
+      let l1 = 150;
+      let l2 = 150;
+
+      // Péndulo 1 (Magenta)
+      let p1 = {
+        a1: 0, a2: 0,
+        a1_v: 0, a2_v: 0,
+        prevX: 0, prevY: 0,
+        color: [208, 36, 210, 50]  // #d024d2 con alpha
+      };
+
+      // Péndulo 2 (Verde)
+      let p2 = {
+        a1: 0, a2: 0,
+        a1_v: 0, a2_v: 0,
+        prevX: 0, prevY: 0,
+        color: [100, 222, 49, 50]  // #64de31 con alpha
+      };
+
+      let centerX, centerY;
+      let trailBuffer;
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        centerX = width / 2;
+        centerY = height / 2;
+
+        trailBuffer = createGraphics(width, height);
+        trailBuffer.background(0);
+        trailBuffer.strokeWeight(1.5);
+
+        // Inicializar péndulos con ángulos ligeramente diferentes
+        initPendulum(p1, 0.1);
+        initPendulum(p2, -0.15);
+      }
+
+      function initPendulum(p, offset) {
+        p.a1 = PI / 2 + random(-0.5, 0.5) + offset;
+        p.a2 = PI / 2 + random(-0.5, 0.5) - offset;
+        p.a1_v = random(-0.05, 0.05);
+        p.a2_v = random(-0.05, 0.05);
+        
+        // VISTA NADIR: invertimos Z (usamos -cos en lugar de cos)
+        let x1 = l1 * sin(p.a1);
+        let y1 = -l1 * cos(p.a1);  // Invertido para nadir
+        p.prevX = centerX + x1 + l2 * sin(p.a2);
+        p.prevY = centerY + y1 - l2 * cos(p.a2);  // Invertido para nadir
+      }
+
+      function updatePendulum(p) {
+        // Física del péndulo doble
+        let num1 = -g * (2 * m1 + m2) * sin(p.a1);
+        let num2 = -m2 * g * sin(p.a1 - 2 * p.a2);
+        let num3 = -2 * sin(p.a1 - p.a2) * m2;
+        let num4 = p.a2_v * p.a2_v * l2 + p.a1_v * p.a1_v * l1 * cos(p.a1 - p.a2);
+        let den = l1 * (2 * m1 + m2 - m2 * cos(2 * p.a1 - 2 * p.a2));
+        let a1_a = (num1 + num2 + num3 * num4) / den;
+
+        num1 = 2 * sin(p.a1 - p.a2);
+        num2 = p.a1_v * p.a1_v * l1 * (m1 + m2);
+        num3 = g * (m1 + m2) * cos(p.a1);
+        num4 = p.a2_v * p.a2_v * l2 * m2 * cos(p.a1 - p.a2);
+        den = l2 * (2 * m1 + m2 - m2 * cos(2 * p.a1 - 2 * p.a2));
+        let a2_a = (num1 * (num2 + num3 + num4)) / den;
+
+        p.a1_v += a1_a;
+        p.a2_v += a2_a;
+        p.a1 += p.a1_v;
+        p.a2 += p.a2_v;
+
+        // Fricción mínima
+        p.a1_v *= 0.9999;
+        p.a2_v *= 0.9999;
+
+        // Calcular posiciones - VISTA NADIR (desde abajo)
+        // Invertimos el eje Z para ver "desde abajo"
+        let x1 = l1 * sin(p.a1);
+        let z1 = -l1 * cos(p.a1);  // NADIR: Z invertido
+        
+        let x2 = x1 + l2 * sin(p.a2);
+        let z2 = z1 - l2 * cos(p.a2);  // NADIR: Z invertido
+
+        let screenX = centerX + x2;
+        let screenY = centerY + z2;
+
+        // Dibujar línea
+        trailBuffer.stroke(p.color[0], p.color[1], p.color[2], p.color[3]);
+        trailBuffer.line(p.prevX, p.prevY, screenX, screenY);
+
+        p.prevX = screenX;
+        p.prevY = screenY;
+      }
+
+      function draw() {
+        // Actualizar ambos péndulos
+        updatePendulum(p1);
+        updatePendulum(p2);
+
+        // Mostrar el buffer
+        image(trailBuffer, 0, 0);
+      }
+
+      function mousePressed() {
+        trailBuffer.background(0);
+        initPendulum(p1, random(-0.2, 0.2));
+        initPendulum(p2, random(-0.2, 0.2));
+      }
+
+      function keyPressed() {
+        if (key === 's' || key === 'S') {
+          saveCanvas('pendulum_nadir_duo', 'png');
+        }
+        if (key === 'r' || key === 'R') {
+          trailBuffer.background(0);
+          initPendulum(p1, random(-0.2, 0.2));
+          initPendulum(p2, random(-0.2, 0.2));
+        }
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        centerX = width / 2;
+        centerY = height / 2;
+        
+        let newBuffer = createGraphics(width, height);
+        newBuffer.background(0);
+        newBuffer.image(trailBuffer, 0, 0);
+        newBuffer.strokeWeight(1.5);
+        trailBuffer = newBuffer;
+      }
+    </script>
+  </body>
+</html>
