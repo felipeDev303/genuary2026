@@ -15,19 +15,29 @@ function setup() {
 function draw() {
   background(10, 15, 25);
   
-  time += 0.4;
+  time += 0.8;
   
-  // Parámetro d animado
-  var d = 3 + sin(time) * 1;
+  // Parámetro d animado (forma de estrella)
+  var d = 3 + sin(time * 0.5) * 1.5;
+  
+  // Ángulo de rotación global
+  var globalAngle = sin(time * 0.3) * 8;
+  
+  // Radio base con pulso
+  var radiusPulse = 1 + sin(time * 0.7) * 0.08;
+  
+  // Extensión de líneas variable
+  var extendFactor = 1 + sin(time * 0.4) * 0.3;
   
   translate(width / 2, height / 2);
+  rotate(globalAngle);
   
-  drawConnectedPattern(d);
+  drawConnectedPattern(d, radiusPulse, extendFactor);
 }
 
-function drawConnectedPattern(d) {
-  var r = 140;
-  var spacing = r * 1.73; // Para grid hexagonal: sqrt(3)
+function drawConnectedPattern(d, radiusPulse, extendFactor) {
+  var r = 140 * radiusPulse;
+  var spacing = 140 * 1.73; // Mantener spacing fijo para la grilla
   
   var cols = ceil(width / spacing) + 3;
   var rows = ceil(height / (spacing * 0.866)) + 3;
@@ -68,12 +78,18 @@ function drawConnectedPattern(d) {
       });
     }
     
-    // Dibujar líneas de estrella internas
-    var dInt = round(d);
+    // Dibujar líneas de estrella internas (interpolación suave)
+    var dLow = floor(d);
+    var dHigh = ceil(d);
+    var blend = d - dLow;
     for (var i = 0; i < n; i++) {
       var p1 = points[i];
-      var p2 = points[(i + dInt) % n];
-      line(p1.x, p1.y, p2.x, p2.y);
+      // Interpolación entre dos configuraciones de estrella
+      var p2Low = points[(i + dLow) % n];
+      var p2High = points[(i + dHigh) % n];
+      var p2x = lerp(p2Low.x, p2High.x, blend);
+      var p2y = lerp(p2Low.y, p2High.y, blend);
+      line(p1.x, p1.y, p2x, p2y);
     }
     
     // Extender cada punta hacia el vecino más cercano
@@ -82,8 +98,8 @@ function drawConnectedPattern(d) {
       var tipX = cx + r * cos(angle);
       var tipY = cy + r * sin(angle);
       
-      // Extender en la misma dirección
-      var extendDist = spacing - r;
+      // Extender en la misma dirección (con factor variable)
+      var extendDist = (spacing - r) * extendFactor;
       var endX = tipX + extendDist * cos(angle);
       var endY = tipY + extendDist * sin(angle);
       
