@@ -1,0 +1,14 @@
+d1 $ stack [
+    -- Kick base
+    s "bd*4" # lpf 350 # gain 1.2,
+    -- Shakers/Hats con un poco de swing
+    s "hh*[8 16]" # nudge "0 0.02" # hpf 3000 # gain (range 0.4 0.7 $ slowly $ sine),
+    -- Percusión con Delay Infinito (estilo Basic Channel)
+    struct "f t f f t f f f" $ s "rim" 
+        # speed 0.7 
+        # delay 0.8 
+        # delayfb 0.7 
+        # delayt (3/16) -- Tiempo de delay asincrónico para texturas
+        # room 0.4 # size 0.9
+] # orbit 0
+
