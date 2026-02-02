@@ -1,14 +1,70 @@
+-- ===============================
+-- TEMPO
+-- ===============================
+setcps (110/60/4)
+
+-- ===============================
+-- DRUMS (NO DOMINANTES)
+-- ===============================
 d1 $ stack [
-    -- Kick base
-    s "bd*4" # lpf 350 # gain 1.2,
-    -- Shakers/Hats con un poco de swing
-    s "hh*[8 16]" # nudge "0 0.02" # hpf 3000 # gain (range 0.4 0.7 $ slowly $ sine),
-    -- Percusión con Delay Infinito (estilo Basic Channel)
-    struct "f t f f t f f f" $ s "rim" 
-        # speed 0.7 
-        # delay 0.8 
-        # delayfb 0.7 
-        # delayt (3/16) -- Tiempo de delay asincrónico para texturas
-        # room 0.4 # size 0.9
+    s "bd*4"
+      # lpf 500
+      # gain 1.2,
+    s "hh*[8 4]"
+      # hpf 2000
+      # gain (range 0.5 0.8 $ slow 2 sine)
 ] # orbit 0
 
+-- ===============================
+-- DARK DUB CHORDS
+-- ===============================
+d2 $ jux (rev . (|* gain 0.8)) 
+  $ struct "t(3,8,2)" 
+  $ n "<bb2'min11 eb3'min9>/8" 
+  # s "supersaw" 
+  # detune 0.02 
+  # sustain 0.4 
+  # lpf (range 550 1100 $ slow 32 sine) 
+  # lpq 0.1 
+  # delay 0.75 
+  # delayfb 0.75 
+  # delayt (3/16) 
+  # room 0.7 
+  # size 0.9 
+  # orbit 1 
+  # gain 0.5
+
+-- ===============================
+-- SUB BASS
+-- ===============================
+d3
+  $ struct "f t f t f f t f"
+  $ n "d1"
+  # s "bass"
+  # lpf 250
+  # sustain 0.4
+  # gain 1.05
+  # detune (range 0 0.05 $ slow 8 sine)
+  # orbit 0
+
+-- ===============================
+-- ATMOSPHERIC TEXTURE
+-- ===============================
+d4
+  $ s "moog:3*8"
+  # gain (range 0.35 0.5 $ slow 10 sine)
+  # lpf (range 400 1800 $ slow 15 sine)
+  # hpf 400
+  # crush 8
+  # room 0.8
+  # size 0.8
+  # orbit 2
+
+-- ===============================
+-- CONTROL
+-- ===============================
+d1 silence
+d2 silence
+d3 silence
+d4 silence
+hush

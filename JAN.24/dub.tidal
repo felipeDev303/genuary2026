@@ -1,0 +1,32 @@
+setcps (120/60/4)
+
+d1 $ "[gabba:1*4, hh*8, [~ cp]*2]" # gain 1.2
+
+d2 
+$ whenmod 16 4 (|+| 3)
+$ jux (rev.(# s "arpy:1").chunk 4 (iter 4))
+$ off 0.125 (|+| 12)
+$ off 0.25 (|+| 7)
+$ n "[d1(3,8) f1(3,8) e1(3,8,2) a1(3,8,2)]/2" # s "arpy:2"
+# room 0.5 # size 0.6 # lpf (range 200 8000 $ slow 2 $ sine)
+# resonance (range 0.03 0.6 $ slow 2.3 $ sine)
+# pan (range 0.1 0.9 $ rand)
+# gain 0.6 
+
+d3
+  $ struct "f t f t f f t f"
+  $ n "g1"
+  # s "bass"
+  # lpf 250
+  # sustain 0.4
+  # gain 1.2
+  # detune (range 0 0.05 $ slow 8 sine)
+  # orbit 0
+
+d1 silence
+d2 silence
+d3 silence
+
+hush
+
+
