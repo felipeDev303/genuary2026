@@ -1,0 +1,36 @@
+setcps (92/60/4)
+
+let glide = pF "glide"
+
+d1 $ stack [
+    s "bd ~ sd:3 ~", 
+    swingBy (1/16) 0.1 $ s "hh27:1*8" # gain "0.8 0.6" 
+]
+
+d2 $ 
+    n "g3 ~ <bf3 c4> d4" 
+    # s "bass:4"     
+    # lpf 800 # lpq 0.1  
+    # decay 0.6         
+    # sustain 0.4
+    # gain 1.1
+
+d3 $ 
+    n "<g4'min9 c4'dom7>" 
+    # s "superpiano"    
+    # phaserdepth 0.6    
+    # phaserrate 0.2     
+    # lpf 2000          
+    # room 0.6 # size 0.7 
+    # gain 0.75
+
+d4 $ 
+    note "d5(3,8) ~ c5 ~" 
+    # s "supersquare"      
+    # sustain 0.2
+    # glide 0.4           
+    # lpf 1500 # lpq 0.2
+    # delay 0.5 # delayt (1/3) 
+    # gain 0.6
+
+hush

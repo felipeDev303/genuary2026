@@ -1,0 +1,18 @@
+setcps (168/60/4)
+
+d1 $ 
+    note "c4 e4 g4 b4 c5 b4 g4 e4" 
+    # s "supersaw"       
+    # lpf (range 400 2800 $ slow 16 sine) 
+    # lpq 0.2            
+    # attack 0.01       
+    # decay 0.2          
+    # sustain 0.1       
+    # release 0.4      
+    # detune 0.15       
+    # voice 0.1         
+    # pan (range 0.4 0.6 $ fast 4 sine) 
+    # room 0.8 # size 0.7            
+    # gain 0.85
+
+hush
