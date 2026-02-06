@@ -1,0 +1,29 @@
+setcps (125/60/4)
+
+d1 $ 
+    note (scale "minPent" "0 2 4 7 0 2 4 3") 
+    # s "juno:3" 
+    # lpf (range 200 700 $ slow 4 sine) 
+    # lpq 0.3         
+    # sustain 0.17 
+    # decay 0.2
+    # voice 0.1        
+    # gain 0.6
+    # orbit 0
+
+d2 $ 
+    stack [
+        s "bd(3,8)" # s "bd:4" # shape 0.3 # lpf 800,
+        s "~ sd:3 ~ ~" # gain 0.8 # dry 1 # room 0.2
+    ] 
+    # orbit 1
+
+d3 $ 
+    s "glitch(3,8)" 
+    # n (irand 10) 
+    # speed (range 0.5 2 $ slow 8 sine) 
+    # hpf 2000 
+    # pan (rand) 
+    # gain 0.7
+
+hush
