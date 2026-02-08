@@ -1,0 +1,28 @@
+setcps (80/60/4)
+
+d1 $ stack [
+    struct "t(3,8) . t(5,16)" $
+    s "glitch" 
+    # n 0           
+    # shape 0.6      
+    # gain 1.2,
+    struct "~ t ~ t" $ 
+    s "glitch2" 
+    # n 7             
+    # speed (range 1 1.2 rand)
+    # gain 1.1,
+    s "glitch*16" 
+    # n "3 1 3 [3 4] 3 1 4 3 3 1 3 4 3 1 4 3" 
+    # pan (fast 4 sine)
+    # gain 0.9,
+    someCyclesBy 0.6 (fast 2) $ 
+    struct "t(11,16)" $ 
+    s "glitch2" 
+    # n (choose [2, 5, 6]) 
+    # hpf 1000     
+    # vowel "a e i o u" 
+    # speed (range 0.5 2 rand) 
+    # gain 0.8
+] # dry 0.9 # room 0.3 
+
+hush
