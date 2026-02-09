@@ -82,23 +82,39 @@ const fragShaderStr = `
       // =============================================
 
 
-      // === LÍNEAS DE CONTORNO Y COLOR ===
+      // === PALETA CIELO - LA NOCHE ESTRELLADA (LÚGUBRE) ===
+      vec3 pureBlack = vec3(0.0, 0.0, 0.02);              // Negro casi puro
+      vec3 chosenBlue = vec3(0.02, 0.05, 0.12);           // Azul noche muy oscuro
+      vec3 starSapphire = vec3(0.05, 0.12, 0.28);         // Azul profundo oscurecido
+      vec3 natureBlue = vec3(0.15, 0.30, 0.55);           // Azul medio más apagado
+      vec3 turquoise = vec3(0.35, 0.55, 0.65);            // Turquesa más tenue
 
-      // Creación de líneas de contorno usando la función seno sobre el ruido final.
-      // Multiplicamos 'f' para aumentar la densidad de líneas.
-      float lines = sin(f * 40.0);
-      // Usamos smoothstep para afilar la onda seno y convertirla en líneas finas.
-      lines = smoothstep(0.90, 0.98, lines);
+      // === LÍNEAS DE CONTORNO (MÚLTIPLES CAPAS DE RUIDO) ===
+      // Capa 1: Líneas principales densas
+      float lines1 = sin(f * 60.0);
+      lines1 = smoothstep(0.85, 0.95, lines1);
+      
+      // Capa 2: Líneas medianas
+      float lines2 = sin(f * 35.0 + 1.2);
+      lines2 = smoothstep(0.88, 0.96, lines2) * 0.6;
+      
+      // Capa 3: Líneas finas sutiles
+      float lines3 = sin(f * 80.0 + 2.5);
+      lines3 = smoothstep(0.92, 0.98, lines3) * 0.3;
 
-      // Paleta Índigo Intenso (Azul Astuto)
-      vec3 colorBg = vec3(0.08, 0.05, 0.25); // Fondo índigo muy oscuro
-      vec3 colorLines = vec3(0.3, 0.4, 0.9); // Líneas azul eléctrico más claro
+      // === GRADIENTE DEL CIELO (CON NEGRO) ===
+      float t_color = f * 0.5 + 0.5;
+      vec3 skyColor = mix(pureBlack, chosenBlue, smoothstep(0.0, 0.25, t_color));
+      skyColor = mix(skyColor, starSapphire, smoothstep(0.25, 0.5, t_color));
+      skyColor = mix(skyColor, natureBlue, smoothstep(0.5, 0.8, t_color));
       
-      // Mezclamos el fondo con el color de línea basado en el cálculo de contorno
-      vec3 finalColor = mix(colorBg, colorLines, lines);
+      // Aplicar todas las capas de líneas
+      vec3 finalColor = mix(skyColor, turquoise, lines1);
+      finalColor = mix(finalColor, natureBlue * 1.3, lines2);
+      finalColor = mix(finalColor, turquoise * 0.8, lines3);
       
-      // Opcional: añadir un poco de la variación del ruido 'f' al fondo para darle profundidad
-      finalColor += f * f * vec3(0.1, 0.05, 0.2);
+      // Profundidad y textura adicional
+      finalColor += vec3(0.01, 0.02, 0.04) * (f * f);
 
       gl_FragColor = vec4(finalColor, 1.0);
   }
@@ -108,8 +124,8 @@ const fragShaderStr = `
 // P5.JS SETUP & DRAW
 // ==========================================================================
 function setup() {
-  // Creamos el canvas en modo WEBGL para usar shaders
-  createCanvas(windowWidth, windowHeight, WEBGL);
+  // Canvas vertical para redes sociales (1080x1920)
+  createCanvas(1080, 1920, WEBGL);
   noStroke();
 
   // Creamos el shader con las cadenas de texto definidas arriba
@@ -129,6 +145,7 @@ function draw() {
   rect(0, 0, width, height);
 }
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
+// Canvas fijo para redes sociales, no redimensionar
+// function windowResized() {
+//   resizeCanvas(windowWidth, windowHeight);
+// }
